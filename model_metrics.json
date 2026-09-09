@@ -1,0 +1,60 @@
+{
+  "results": [
+    {
+      "model": "Linear Regression",
+      "mae": 11.4442,
+      "rmse": 13.2225,
+      "r2": 0.6224,
+      "cv_r2_mean": 0.6225,
+      "cv_r2_std": 0.0169,
+      "monotonicity": 1.0,
+      "resolution": 0.8375,
+      "stability": 0.9187
+    },
+    {
+      "model": "Decision Tree Regressor",
+      "mae": 11.2772,
+      "rmse": 13.0859,
+      "r2": 0.6302,
+      "cv_r2_mean": 0.6262,
+      "cv_r2_std": 0.0176,
+      "monotonicity": 0.9744,
+      "resolution": 0.05,
+      "stability": 0.5122
+    },
+    {
+      "model": "Random Forest Regressor",
+      "mae": 11.206,
+      "rmse": 12.9768,
+      "r2": 0.6363,
+      "cv_r2_mean": 0.6338,
+      "cv_r2_std": 0.0149,
+      "monotonicity": 0.6362,
+      "resolution": 0.6812,
+      "stability": 0.6587
+    }
+  ],
+  "best_model": "Linear Regression",
+  "top_r2": 0.6363,
+  "r2_tolerance": 0.02,
+  "accuracy_equivalent": [
+    "Linear Regression",
+    "Decision Tree Regressor",
+    "Random Forest Regressor"
+  ],
+  "selection_metric": "R2 on a 20% held-out split, then response stability as the tie-break among models within 0.02 R2 of the best score",
+  "selection_reason": "3 of 3 models scored within 0.02 R2 of the best result (0.6363) \u2014 a gap smaller than the five-fold cross-validation spread, so they are treated as accuracy-equivalent. Linear Regression was selected on response stability (0.919), which matters because the same model traces the 2026-2035 forecast curve.",
+  "train_rows": 4800,
+  "test_rows": 1200,
+  "features": [
+    "Industry",
+    "Country",
+    "Employee_Size",
+    "Uses_AI",
+    "Use_Case",
+    "Year",
+    "Log_Revenue",
+    "AI_ROI_Percent"
+  ],
+  "target": "AI_Maturity_Score"
+}
