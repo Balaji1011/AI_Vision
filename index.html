@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}AI Vision 2035 — Global AI Adoption &amp; Forecasting{% endblock %}
+{% block bodyclass %}page-home{% endblock %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/charts.css') }}" />
+{% endblock %}
+
+{% block content %}
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="shell hero-grid">
+    <div>
+      <span class="pill"><i class="dot"></i> 6,000 company-years · 2020&ndash;2025</span>
+      <h1 style="margin-top:1.5rem">
+        Where AI adoption<br />
+        actually <span class="gradient-text">pays off</span>
+      </h1>
+      <p class="hero-lede">
+        A working analytics platform over six years of Fortune-500 AI adoption
+        data. Explore what separates the leaders from the laggards, then run a
+        trained model forward to 2035 to see where a company, country or
+        industry lands.
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="{{ url_for('dashboard') }}">
+          Open the dashboard
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+        <a class="btn btn-ghost" href="{{ url_for('about') }}">How the model works</a>
+      </div>
+
+      <div class="hero-facts">
+        <div class="hero-fact">
+          <span class="metric" id="fact-companies" data-count="0">0</span>
+          <span>Companies</span>
+        </div>
+        <div class="hero-fact">
+          <span class="metric" id="fact-records" data-count="0">0</span>
+          <span>Records</span>
+        </div>
+        <div class="hero-fact">
+          <span class="metric" id="fact-countries" data-count="0">0</span>
+          <span>Countries</span>
+        </div>
+        <div class="hero-fact">
+          <span class="metric" id="fact-industries" data-count="0">0</span>
+          <span>Industries</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signature panel: the single clearest finding, shown live -->
+    <aside class="readout">
+      <div class="readout-head">
+        <span>Adoption gap</span>
+        <span>2020&ndash;2025</span>
+      </div>
+      <div class="chart readout-chart" id="hero-chart"></div>
+
+      <div class="readout-rows">
+        <div class="readout-row">
+          <span>Companies running AI</span>
+          <span class="metric" id="readout-adopters">&mdash;</span>
+          <span class="bar-track"><span class="bar-fill" id="bar-adopters"></span></span>
+        </div>
+        <div class="readout-row">
+          <span>Companies without AI</span>
+          <span class="metric" id="readout-non">&mdash;</span>
+          <span class="bar-track"><span class="bar-fill" id="bar-non"></span></span>
+        </div>
+        <div class="readout-row" style="border-top:1px solid var(--line);padding-top:0.85rem">
+          <span>Maturity difference</span>
+          <span class="metric" id="readout-gap" style="color:var(--lime)">&mdash;</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ===================== STATS ===================== -->
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    <div class="stat-strip reveal">
+      <div class="stat">
+        <span class="metric" id="stat-maturity" data-count="0" data-decimals="1">0</span>
+        <span>Average maturity score</span>
+      </div>
+      <div class="stat">
+        <span class="metric" id="stat-adoption" data-count="0" data-decimals="1" data-suffix="%">0</span>
+        <span>AI adoption rate</span>
+      </div>
+      <div class="stat">
+        <span class="metric" id="stat-roi" data-count="0" data-decimals="1" data-suffix="%">0</span>
+        <span>Average AI ROI</span>
+      </div>
+      <div class="stat">
+        <span class="metric" id="stat-peak" data-count="0">0</span>
+        <span>Highest score recorded</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FEATURES ===================== -->
+<section class="section" id="features">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow">What's inside</span>
+      <h2>Analysis and forecasting in one place</h2>
+      <p>
+        The platform does two jobs: it explains what happened between 2020 and
+        2025, and it projects what a given profile looks like up to 2035 using a
+        model trained on that same history.
+      </p>
+    </div>
+
+    <div class="grid-3">
+      <article class="card reveal">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 3v18h18" stroke-linecap="round" /><path d="M7 15l4-5 3 3 4-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </div>
+        <h3>Historical analysis</h3>
+        <p>
+          Twelve interactive views across year, country, industry, company,
+          revenue, ROI and use case &mdash; every one computed from the source
+          file at request time.
+        </p>
+      </article>
+
+      <article class="card reveal">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="5" cy="6" r="2" /><circle cx="19" cy="6" r="2" /><circle cx="5" cy="18" r="2" /><circle cx="19" cy="18" r="2" /><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3" stroke-linecap="round" /></svg>
+        </div>
+        <h3>Three models compared</h3>
+        <p>
+          Linear Regression, Decision Tree and Random Forest are trained on the
+          same split and scored on MAE, RMSE and R². The winner is saved with
+          Joblib and served from disk.
+        </p>
+      </article>
+
+      <article class="card reveal">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3" stroke-linecap="round" /><circle cx="12" cy="12" r="3.4" /></svg>
+        </div>
+        <h3>Forecasts to 2035</h3>
+        <p>
+          Pick a company, country, industry and target year. The model returns a
+          maturity score, growth rate, ten-year trajectory and a recommendation
+          tied to the predicted band.
+        </p>
+      </article>
+
+      <article class="card reveal">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" stroke-linecap="round" /></svg>
+        </div>
+        <h3>Stated assumptions</h3>
+        <p>
+          Forecasts run under a scenario you choose. The dashboard shows exactly
+          which assumptions each scenario applies, so a projection is never
+          mistaken for a measurement.
+        </p>
+      </article>
+
+      <article class="card reveal">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" stroke-linejoin="round" /><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5" stroke-linejoin="round" /></svg>
+        </div>
+        <h3>Sample-size warnings</h3>
+        <p>
+          Segments backed by fewer than 60 records are flagged in place. Thin
+          slices are excluded from the headline findings rather than quietly
+          ranked alongside solid ones.
+        </p>
+      </article>
+
+      <article class="card reveal">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7" stroke-linecap="round" /></svg>
+        </div>
+        <h3>No external dependencies</h3>
+        <p>
+          Charts, animation and layout are hand-written in SVG, CSS and vanilla
+          JavaScript. No chart library, no CSS framework, no CDN, no API calls.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PREVIEWS ===================== -->
+<section class="section" style="padding-top:0">
+  <div class="shell grid-2">
+    <div class="preview reveal">
+      <div class="preview-head">
+        <div>
+          <span class="eyebrow">Section 1</span>
+          <h3>Historical analysis</h3>
+        </div>
+        <span class="pill">Avg maturity</span>
+      </div>
+      <div class="chart preview-chart" id="preview-historical"></div>
+      <p style="font-size:0.86rem;margin:1rem 0 0">
+        Industry ranking across well-sampled sectors. The spread is narrow &mdash;
+        sector alone explains very little.
+      </p>
+    </div>
+
+    <div class="preview reveal">
+      <div class="preview-head">
+        <div>
+          <span class="eyebrow">Section 2</span>
+          <h3>Forecast to 2035</h3>
+        </div>
+        <span class="pill">
+          <span class="metric" id="preview-forecast-value">&mdash;</span>
+        </span>
+      </div>
+      <div class="chart preview-chart" id="preview-forecast"></div>
+      <p style="font-size:0.86rem;margin:1rem 0 0">
+        Technology sector under the moderate-adoption scenario, predicted by
+        <span class="metric" id="preview-model" style="color:var(--cyan)">&mdash;</span>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== WORKFLOW ===================== -->
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow">Machine learning workflow</span>
+      <h2>From raw file to forecast</h2>
+      <p>Each stage runs in order. The numbered sequence reflects real execution order, not decoration.</p>
+    </div>
+
+    <div class="workflow reveal">
+      <div class="workflow-step">
+        <span class="step-no metric">01</span>
+        <div>
+          <h4>Load and clean</h4>
+          <p>Read 6,000 rows. Blank use cases become an explicit <code>None</code> category, since they mark non-adopters rather than missing data. Duplicates dropped.</p>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <span class="step-no metric">02</span>
+        <div>
+          <h4>Engineer features</h4>
+          <p>Revenue spans six orders of magnitude, so it is log-scaled. Categoricals are one-hot encoded; numerics are standardised.</p>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <span class="step-no metric">03</span>
+        <div>
+          <h4>Train and compare</h4>
+          <p>Three regressors fit on an 80/20 split, each scored on MAE, RMSE and R², with five-fold cross-validation as a stability check.</p>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <span class="step-no metric">04</span>
+        <div>
+          <h4>Select and persist</h4>
+          <p>Models within 0.02 R² of the best score count as accuracy-equivalent; the tie is broken on response stability. The winner is refit on the full dataset and written to <code>model.pkl</code> with Joblib.</p>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <span class="step-no metric">05</span>
+        <div>
+          <h4>Project and predict</h4>
+          <p>Features are rolled forward year by year under the chosen scenario, then passed through the saved pipeline for 2026&ndash;2035.</p>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <span class="step-no metric">06</span>
+        <div>
+          <h4>Visualise and advise</h4>
+          <p>Results render as SVG charts alongside a recommendation keyed to the predicted maturity band.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    <div class="cta reveal">
+      <span class="eyebrow">Ready when you are</span>
+      <h2>Run the numbers yourself</h2>
+      <p>
+        Pick a profile, choose a scenario, and get a maturity forecast with the
+        assumptions behind it shown in full.
+      </p>
+      <a class="btn btn-primary" href="{{ url_for('dashboard') }}">
+        Open the dashboard
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

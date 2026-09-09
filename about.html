@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+
+{% block title %}About — AI Vision 2035{% endblock %}
+{% block bodyclass %}page-about{% endblock %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/charts.css') }}" />
+{% endblock %}
+
+{% block content %}
+
+<section class="about-hero">
+  <div class="shell">
+    <span class="eyebrow">About the platform</span>
+    <h1>How AI Vision 2035 works</h1>
+    <p class="about-lede">
+      This page documents the whole pipeline: what the dataset contains, how it
+      was cleaned, which models were trained, how the forecast is constructed,
+      and — importantly — what the data cannot tell you.
+    </p>
+  </div>
+</section>
+
+<!-- Overview ---------------------------------------------------------------->
+<section class="section" style="padding-top:2rem">
+  <div class="shell split reveal">
+    <h2>Project overview</h2>
+    <div class="prose">
+      <p>
+        AI Vision 2035 is a Flask analytics application built over a single
+        dataset of 6,000 company-year records covering AI adoption between 2020
+        and 2025. It has two jobs. The first is descriptive: summarise what the
+        six years of history actually show across companies, countries,
+        industries, revenue bands and use cases. The second is predictive: train
+        a regression model on that history and use it to project an AI maturity
+        score for any profile out to 2035.
+      </p>
+      <p>
+        Every number rendered in the browser is computed server-side from
+        <code>dataset.csv</code> when the page requests it. No statistic is
+        hard-coded into a template, and no external service is called at any
+        point.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Objectives -------------------------------------------------------------->
+<section class="section" style="padding-top:0">
+  <div class="shell split reveal">
+    <h2>Objectives</h2>
+    <div class="prose">
+      <ul>
+        <li>Quantify how AI adoption relates to measured AI maturity across the 2020–2025 window.</li>
+        <li>Compare maturity across countries, industries and companies while flagging segments too small to rank.</li>
+        <li>Train and benchmark three regression models on identical splits and select the strongest on held-out data.</li>
+        <li>Project AI maturity to 2035 under explicit, user-selectable scenarios.</li>
+        <li>Turn each prediction into a recommendation tied to the predicted maturity band.</li>
+        <li>Present all of it in an interface that states its own assumptions rather than hiding them.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Dataset ----------------------------------------------------------------->
+<section class="section" style="padding-top:0">
+  <div class="shell split reveal">
+    <h2>Dataset description</h2>
+    <div class="prose">
+      <p>
+        Source file: <code>ai-adoption-fortune500-synthetic-dataset-2020-2025.csv</code>
+        — 6,000 rows, 11 columns, one row per company per year. 1,000 companies
+        each appear in all six years.
+      </p>
+
+      <table class="data-table">
+        <thead>
+          <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Year</td><td>Integer</td><td>2020 through 2025.</td></tr>
+          <tr><td>Company</td><td>Text</td><td>20 real firms plus 980 generated <code>SyntheticCorp_*</code> entries.</td></tr>
+          <tr><td>Industry</td><td>Category</td><td>12 sectors.</td></tr>
+          <tr><td>Country</td><td>Category</td><td>10 markets.</td></tr>
+          <tr><td>Company_Type</td><td>Category</td><td>Real or Synthetic.</td></tr>
+          <tr><td>Employee_Size</td><td>Category</td><td>Enterprise or SME.</td></tr>
+          <tr><td>Revenue_USD</td><td>Float</td><td>$1.0M to $495B — six orders of magnitude.</td></tr>
+          <tr><td>Uses_AI</td><td>Category</td><td>Yes or No. 81% of records are Yes.</td></tr>
+          <tr><td>Use_Case</td><td>Category</td><td>12 use cases; blank for all 1,152 non-adopter rows.</td></tr>
+          <tr><td>AI_ROI_Percent</td><td>Float</td><td>0 to 40. Exactly 0 for every non-adopter.</td></tr>
+          <tr><td>AI_Maturity_Score</td><td>Integer</td><td>0 to 100. The prediction target.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="notice" style="margin-bottom:1.5rem">
+        <span>&#9888;</span>
+        <span>
+          <strong>Two limits worth knowing up front.</strong>
+          Average maturity moves from 55.0 in 2020 to 54.7 in 2025 — the series has no
+          time trend, and <code>Year</code> correlates with the target at roughly zero.
+          Separately, only the 20 real companies keep a stable industry and country;
+          the generated companies are reassigned each year, which is why segments
+          such as South Korea and Industrial contain fewer than a dozen rows.
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features ---------------------------------------------------------------->
+<section class="section" style="padding-top:0">
+  <div class="shell split reveal">
+    <h2>Features and target</h2>
+    <div class="prose">
+      <p>
+        The model predicts <strong>AI_Maturity_Score</strong> from eight input
+        features. <code>Company</code> is deliberately excluded: with 1,000
+        identities and six rows each, one-hot encoding it would let the model
+        memorise individual firms rather than learn transferable structure, and
+        it would be useless for any company not already in the file.
+      </p>
+
+      <table class="data-table">
+        <thead>
+          <tr><th>Feature</th><th>Encoding</th><th>Why</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Year</td><td>Standardised</td><td>Carries the time position, though its signal is near zero.</td></tr>
+          <tr><td>Industry</td><td>One-hot</td><td>12 sectors.</td></tr>
+          <tr><td>Country</td><td>One-hot</td><td>10 markets.</td></tr>
+          <tr><td>Employee_Size</td><td>One-hot</td><td>Enterprise vs SME.</td></tr>
+          <tr><td>Uses_AI</td><td>One-hot</td><td>The strongest single predictor in the file.</td></tr>
+          <tr><td>Use_Case</td><td>One-hot</td><td>Blanks become an explicit <code>None</code> level.</td></tr>
+          <tr><td>Revenue_USD</td><td>log₁₀, standardised</td><td>Stops a handful of mega-caps dominating the linear model.</td></tr>
+          <tr><td>AI_ROI_Percent</td><td>Standardised</td><td>Correlates with the target at 0.61.</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.9rem">
+        Target: <code>AI_Maturity_Score</code>, a continuous 0–100 value, which
+        makes this a regression problem rather than a classification one.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Historical analysis ------------------------------------------------------>
+<section class="section" style="padding-top:0">
+  <div class="shell split reveal">
+    <h2>Historical analysis</h2>
+    <div class="prose">
+      <p>
+        Section 1 of the dashboard aggregates the file eight ways: by year, by
+        country, by industry, by company, revenue against maturity, ROI band,
+        use-case mix, and adoption growth. Aggregations run in Pandas and are
+        returned as JSON; the browser draws them as SVG.
+      </p>
+      <p>
+        The clearest finding is the adoption gap. Companies with an active AI use
+        case average 62.8 on maturity against 19.7 for those without — a 43-point
+        difference. Nothing else in the dataset produces an effect anywhere near
+        that size: the full spread between the best and worst well-sampled
+        country is under three points.
+      </p>
+      <p>
+        Any segment holding fewer than 60 records is drawn in amber and labelled
+        in its tooltip, and is left out of the generated findings entirely.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ML workflow ------------------------------------------------------------->
+<section class="section" style="padding-top:0">
+  <div class="shell split reveal">
+    <h2>Machine learning workflow</h2>
+    <div class="prose">
+      <div class="pipeline">
+        <div class="pipeline-node"><span class="metric">01</span> Dataset — 6,000 rows read from dataset.csv</div>
+        <div class="pipeline-arrow">&#8595;</div>
+        <div class="pipeline-node"><span class="metric">02</span> Data cleaning — blanks encoded, duplicates dropped</div>
+        <div class="pipeline-arrow">&#8595;</div>
+        <div class="pipeline-node"><span class="metric">03</span> Data analysis — distributions, correlations, segment sizes</div>
+        <div class="pipeline-arrow">&#8595;</div>
+        <div class="pipeline-node"><span class="metric">04</span> Feature engineering — log revenue, one-hot, standardise</div>
+        <div class="pipeline-arrow">&#8595;</div>
+        <div class="pipeline-node"><span class="metric">05</span> Model training — three regressors on an 80/20 split</div>
+        <div class="pipeline-arrow">&#8595;</div>
+        <div class="pipeline-node is-target"><span class="metric">06</span> Prediction — AI_Maturity_Score</div>
+        <div class="pipeline-arrow">&#8595;</div>
+        <div class="pipeline-node"><span class="metric">07</span> Visualisation — SVG charts rendered in the browser</div>
+        <div class="pipeline-arrow">&#8595;</div>
+        <div class="pipeline-node"><span class="metric">08</span> Business insights — banded recommendations</div>
+      </div>
+
+      <p>
+        All three candidates are wrapped in the same scikit-learn
+        <code>Pipeline</code>, so preprocessing is fitted inside each
+        cross-validation fold rather than on the full dataset. The winner is
+        refit on all 6,000 rows before being written to <code>model.pkl</code>
+        with Joblib.
+      </p>
+
+      <table class="data-table" id="metrics-table">
+        <thead>
+          <tr><th>Model</th><th>MAE</th><th>RMSE</th><th>R²</th><th>CV R²</th><th>Stability</th></tr>
+        </thead>
+        <tbody><tr><td colspan="6">Loading metrics…</td></tr></tbody>
+      </table>
+
+      <h3 style="font-size:1.05rem;margin-top:1.75rem">Why selection is not on R² alone</h3>
+      <p>
+        The three models land within 0.014 R² of each other — a gap smaller than
+        the spread of five-fold cross-validation on this data. Picking the top
+        number would be selecting on noise.
+      </p>
+      <p>
+        It also matters that this model is used twice: once to score a single
+        profile, and again to trace a ten-year forecast curve. The second use
+        needs a smooth, non-decreasing response to a rising input. Tree
+        ensembles cannot provide that, because they are piecewise-constant by
+        construction. Tuned with small leaves the Random Forest produced a
+        visibly jagged curve; tuned with large leaves it produced a flat line
+        with sudden cliffs. Neither is a defensible forecast.
+      </p>
+      <p>
+        So the selection rule has two stages, and stays fully automatic. Any
+        model within <code>R2_TOLERANCE = 0.02</code> of the best score is
+        treated as accuracy-equivalent, and the tie is broken on a measured
+        <strong>response stability</strong> score. That score sweeps
+        <code>AI_ROI_Percent</code> across its observed range for 16 real
+        profiles and records two things: the share of steps that do not move
+        backwards, and the share of sweep points producing a distinct value.
+        Both numbers are reported in the table above.
+      </p>
+      <p style="font-size:0.88rem">
+        On this dataset all three models qualify on accuracy, and Linear
+        Regression wins the tie-break at 0.92 against 0.66 for the Random Forest
+        and 0.51 for the Decision Tree. Trading 0.014 R² for a forecast curve
+        that behaves sensibly is the right exchange here. Re-run
+        <code>train_model.py</code> on different data and the rule may well pick
+        a different model — nothing is hard-coded.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Forecasting ------------------------------------------------------------->
+<section class="section" style="padding-top:0">
+  <div class="shell split reveal">
+    <h2>Future forecasting</h2>
+    <div class="prose">
+      <p>
+        The model maps features to a maturity score; it does not extrapolate
+        time on its own. To forecast a future year, the input features must be
+        projected forward first, then passed through the saved pipeline. That
+        projection is where the assumptions live, so the dashboard makes you
+        choose one.
+      </p>
+      <ul>
+        <li><strong>Data trend</strong> — rolls ROI and revenue forward on the slope measured in the selected segment's own history. Because that history is flat, this produces a near-flat forecast. It is the honest baseline.</li>
+        <li><strong>Moderate adoption</strong> — assumes AI ROI improves 1.5 points and revenue grows 4% per year.</li>
+        <li><strong>Accelerated adoption</strong> — assumes 3.5 points of ROI improvement and 8% revenue growth per year.</li>
+      </ul>
+      <p>
+        The last two are stated assumptions, not measurements, and the dashboard
+        labels them as such next to every result. Projected ROI is clipped to the
+        range observed in the data so the model is never asked to score an input
+        it has never seen, and predictions are clipped to 0–100.
+      </p>
+      <p>
+        Growth is reported against a 2025 baseline scored by the same model on the
+        same profile, so the comparison isolates the effect of the projected
+        features rather than mixing model error into the difference.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Tech -------------------------------------------------------------------->
+<section class="section" style="padding-top:0">
+  <div class="shell split reveal">
+    <h2>Technologies used</h2>
+    <div class="prose">
+      <div class="tag-row">
+        <span class="tag">HTML5</span>
+        <span class="tag">CSS3</span>
+        <span class="tag">JavaScript (ES6)</span>
+        <span class="tag">Python 3</span>
+        <span class="tag">Flask</span>
+        <span class="tag">Pandas</span>
+        <span class="tag">NumPy</span>
+        <span class="tag">scikit-learn</span>
+        <span class="tag">Joblib</span>
+      </div>
+      <p>
+        No React, no Bootstrap, no Tailwind, no Node, no Django, no database and
+        no third-party API. The chart engine in
+        <code>static/js/charts.js</code> is roughly 300 lines of hand-written SVG
+        drawing code covering line, area, bar, scatter and pie, with tooltips and
+        resize handling. Layout, glass effects and animation are plain CSS.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Future scope ------------------------------------------------------------>
+<section class="section" style="padding-top:0">
+  <div class="shell split reveal">
+    <h2>Future scope</h2>
+    <div class="prose">
+      <ul>
+        <li><strong>Real longitudinal data.</strong> The single biggest improvement would be a source where company attributes stay stable year to year, which would make genuine per-company trend modelling possible.</li>
+        <li><strong>Prediction intervals.</strong> Quantile regression or a bootstrap over the forest would let each forecast carry a range rather than a point estimate.</li>
+        <li><strong>Explainability.</strong> Per-prediction feature attributions would show which inputs drove a given score.</li>
+        <li><strong>Time-aware validation.</strong> Training on 2020–2023 and testing on 2024–2025 would measure forward generalisation properly, rather than a random split.</li>
+        <li><strong>Scenario comparison.</strong> Running all three scenarios side by side on one chart.</li>
+        <li><strong>Export.</strong> Downloading a forecast and its assumptions as CSV or PDF.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  /* Fill the model comparison table from the API so the page never drifts
+     out of sync with whatever train_model.py last produced. */
+  getJSON('/api/model')
+    .then((m) => {
+      const rows = m.results
+        .map(
+          (r) => `
+          <tr${r.model === m.best_model ? ' style="background:rgba(34,211,238,0.06)"' : ''}>
+            <td>${r.model}${r.model === m.best_model ? ' &#9733;' : ''}</td>
+            <td>${r.mae.toFixed(2)}</td>
+            <td>${r.rmse.toFixed(2)}</td>
+            <td>${r.r2.toFixed(3)}</td>
+            <td>${r.cv_r2_mean.toFixed(3)} &plusmn; ${r.cv_r2_std.toFixed(3)}</td>
+            <td>${r.stability.toFixed(3)}</td>
+          </tr>`
+        )
+        .join('');
+      document.querySelector('#metrics-table tbody').innerHTML =
+        rows +
+        `<tr><td colspan="6" style="color:var(--ink-faint);font-size:0.82rem">
+           &#9733; selected &mdash; ${m.selection_reason}
+         </td></tr>`;
+    })
+    .catch((err) => {
+      document.querySelector('#metrics-table tbody').innerHTML =
+        `<tr><td colspan="6">Metrics unavailable: ${err.message}</td></tr>`;
+    });
+</script>
+{% endblock %}
